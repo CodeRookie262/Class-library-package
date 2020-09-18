@@ -10,11 +10,11 @@
 
 - [x] **MyPromise.resolve(callback)**
 
-- [x] **MyPromise.race(callback)**
+- [x] **MyPromise.race(ArrayLike)**
 
-- [x] **MyPromise.all(callback)**
+- [x] **MyPromise.all(ArrayLike)**
 
-- [x] **MyPromise.allSettled(callback)**
+- [x] **MyPromise.allSettled(ArrayLike)**
 
 - [x] **MyPromise.prototype.then(resolveCall,rejectCallback)**
 
