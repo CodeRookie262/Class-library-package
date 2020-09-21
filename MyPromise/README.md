@@ -12,6 +12,8 @@
 
 - [x] **MyPromise.race(ArrayLike)**
 
+- [x] **MyPromise.any(ArrayLike)**
+
 - [x] **MyPromise.all(ArrayLike)**
 
 - [x] **MyPromise.allSettled(ArrayLike)**

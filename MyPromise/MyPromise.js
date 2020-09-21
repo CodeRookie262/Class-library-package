@@ -5,6 +5,21 @@
     pending = 'pending',
     fulfilled = 'fulfilled';
 
+  // 工具类
+  const util = {
+    // 判断是否是数组/类数组
+    isArrayLike: function (arr) {
+      return (
+        !!arr &&
+        'length' in arr &&
+        typeof arr.length === 'number' &&
+        arr.window !== w &&
+        typeof arr !== 'function' &&
+        typeof arr.nodeType !== 'number'
+      );
+    },
+  };
+
   /**
    *
    * @param {Function} executor 执行器函数，接受两个参数 resolve | reject 分别管理 MyPromise 的状态
@@ -114,14 +129,7 @@
    * 如果是 MyPromiseInstance 则会判断其状态，如果是其他类型则直接视为成功状态
    */
   MyPromise.race = function (MyPromises) {
-    if (
-      !!MyPromises &&
-      'length' in MyPromises &&
-      typeof MyPromises.length === 'number' &&
-      MyPromises.window !== w &&
-      typeof MyPromises !== 'function' &&
-      typeof MyPromises.nodeType !== 'number'
-    ) {
+    if (util.isArrayLike(MyPromises)) {
       return new MyPromise(function (resolve, reject) {
         var len = MyPromises.length;
         for (var i = 0; i < len; i++) {
@@ -142,14 +150,7 @@
   function allFun(MyPromises, filter) {
     var res = [];
     // MyPromises => Array | ArrayLike
-    if (
-      !!MyPromises &&
-      'length' in MyPromises &&
-      typeof MyPromises.length === 'number' &&
-      MyPromises.window !== w &&
-      typeof MyPromises !== 'function' &&
-      typeof MyPromises.nodeType !== 'number'
-    ) {
+    if (util.isArrayLike(MyPromises)) {
       var len = MyPromises.length,
         curSuccess = 0;
       return new MyPromise(function (resolve, reject) {
@@ -179,6 +180,50 @@
       );
     }
   }
+
+  /**
+   *
+   * @param {ArrayLike} MyPromises
+   *
+   * 特性：any 方法接受一个数组/类数组
+   *        如果数组为空则返回一个 fulfilled 状态的 MyPromise
+   *        如果存在多个 fulfilled 状态的 MyPromise 实例则优先取第一个
+   *        如果所有的 MyPromise 实例都为 rejected 状态的话，则返回一个 rejected 的 MyPromise 实例
+   */
+  MyPromise.any = function (MyPromises) {
+    if (util.isArrayLike(MyPromises)) {
+      return new MyPromise(function (resolve, reject) {
+        var len = MyPromises.length;
+        var n = 0;
+        var errSet = [];
+        if (len === 0) resolve([]);
+        // 遍历 MyPromise 数组
+        for (var i = 0; i < len; i++) {
+          if (MyPromises[i] instanceof MyPromise) {
+            MyPromises[i].then(
+              function (res) {
+                resolve(res);
+                n++;
+              },
+              function (err) {
+                n++;
+                errSet.push(err);
+                if (n === len) {
+                  reject(errSet);
+                }
+              }
+            );
+          } else {
+            resolve(MyPromises[i]);
+          }
+        }
+      });
+    } else {
+      throw TypeError(
+        'MyPromises is not iterable (cannot read property Symbol(Symbol.iterator))'
+      );
+    }
+  };
 
   // 原型方法
   MyPromise.prototype = {
@@ -245,4 +290,4 @@
   } else {
     w.MyPromise = MyPromise;
   }
-})(typeof window === 'undefinde' ? window : {}, undefined);
+})(typeof window !== 'undefinde' ? window : {}, undefined);
